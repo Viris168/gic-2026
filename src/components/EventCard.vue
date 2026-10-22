@@ -42,7 +42,7 @@ const almostFull = computed(() => left.value  >= 1 && left.value  <= 5);
       {{ left }} {{ left === 1 ? "seat": "seats"}} left
     </p>
 
-    <button :disabled="isFull" @click="emit('book', event.id)">Book a seat</button>
+    <button :disabled="isFull" @click="emit('book', props.event.id)">Book a seat</button>
   </article>
 </template>
 

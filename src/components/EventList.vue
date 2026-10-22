@@ -24,11 +24,17 @@ const emit = defineEmits<{ book:  [id:number]}>();
   const visible = computed(
     () => {
 
+      const s = search.value.trim().toLocaleLowerCase();
+
       return props.events.filter(
         e => {
-            
+            const matchCategory = category.value === 'all' || e.category === category.value
+            const matchSearch = !s || e.title.toLocaleLowerCase().includes(s) || e.location.toLocaleLowerCase().includes(s)
+          return matchCategory && matchSearch ;
         }
+        
       )
+    }
   )
 </script>
 
@@ -36,8 +42,10 @@ const emit = defineEmits<{ book:  [id:number]}>();
   <section>
     <div class="filters">
       <!-- TODO 4: bind the input and the select to your refs with v-model -->
-      <input type="search" placeholder="Search title or location" aria-label="Search" />
-      <select aria-label="Category">
+
+      <input v-model="search" type="search" placeholder="Search title or location" aria-label="Search" />
+
+      <select v-model="category" aria-label="Category">
         <option value="all">All categories</option>
         <option value="talk">Talks</option>
         <option value="workshop">Workshops</option>
@@ -47,13 +55,20 @@ const emit = defineEmits<{ book:  [id:number]}>();
     </div>
 
     <!-- TODO 5: show "<visible count> of <total> events" -->
-    <p class="count">6 of 6 events</p>
+    <p class="count">{{ visible.length }} of {{ events.length }} events</p>
 
     <!-- TODO 6: render one EventCard per visible event (v-for with a :key),
          pass the event as a prop and pass its "book" event up.
          When nothing is visible, show the empty message instead (v-if / v-else). -->
-    <div class="grid"></div>
-    <p class="empty">No events match your search.</p>
+    <div v-if="visible.length" class="event-grid">
+      <EventCard
+        v-for="e in visible"
+        :key="e.id"
+        :event="e"
+        @book="emit('book', $event)"
+      />
+    </div>
+    <p v-else class="empty">No events match your search.</p>
   </section>
 </template>
 
@@ -61,6 +76,6 @@ const emit = defineEmits<{ book:  [id:number]}>();
 .filters { display: flex; gap: 8px; flex-wrap: wrap; }
 .filters input { flex: 1; min-width: 200px; }
 .count { color: #6b7280; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 .empty { padding: 32px; text-align: center; background: white; border-radius: 10px; }
 </style>
